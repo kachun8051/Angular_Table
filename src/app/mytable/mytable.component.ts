@@ -1,38 +1,75 @@
-import {Component} from '@angular/core';
-//import { MatTableDataSource, MatSort } from '@angular/material';
-//import { DataSource } from '@angular/cdk/table';
-
-export interface PeriodicElement {
-  name: string;
-  position: number;
-  weight: number;
-  symbol: string;
-}
-
-const ELEMENT_DATA: PeriodicElement[] = [
-  {position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H'},
-  {position: 2, name: 'Helium', weight: 4.0026, symbol: 'He'},
-  {position: 3, name: 'Lithium', weight: 6.941, symbol: 'Li'},
-  {position: 4, name: 'Beryllium', weight: 9.0122, symbol: 'Be'},
-  {position: 5, name: 'Boron', weight: 10.811, symbol: 'B'},
-  {position: 6, name: 'Carbon', weight: 12.0107, symbol: 'C'},
-  {position: 7, name: 'Nitrogen', weight: 14.0067, symbol: 'N'},
-  {position: 8, name: 'Oxygen', weight: 15.9994, symbol: 'O'},
-  {position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F'},
-  {position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne'},
-];
+import { Component, OnInit } from '@angular/core';
+import { HttpClient, HttpResponse } from '@angular/common/http';
+import { BbqRecord } from '../BbqRecord.model';
 
 /**
  * @title Basic use of `<table mat-table>`
  */
-@Component({
+ @Component({
   selector: 'app-mytable',
   templateUrl: './mytable.component.html',
   styleUrls: ['./mytable.component.css']
 })
 
-export class MytableComponent {
-  displayedColumns: string[] = ['position', 'name', 'weight', 'symbol'];
-  dataSource = ELEMENT_DATA;
+export class MytableComponent implements OnInit {
+  http: HttpClient;
+  serverData: Object | null;
+  myDataSource !: BbqRecord[];  
+  displayedColumns: string[] = ['GIHS', 'name', 'district', 'address','longitude','latitude', 'edit', 'delete'];
+  dataSource = this.myDataSource;
+
+  constructor(http: HttpClient) {
+    this.http = http;
+    this.serverData = null;
+    this.myDataSource = [];
+  }
+
+  ngOnInit(): void {
+    this.onload();
+  }
+
+  // custom funtion (fillData) added by wong ka chun
+  fillData(arr: Object): void {
+    this.serverData = arr;
+    let objData = JSON.parse(JSON.stringify(arr));
+    let serverDataArr = objData.data;
+    console.log(serverDataArr.length);
+    // bbq in serverDataArr for-loop should be referred to actual json object 
+    // but not BbqRecord model
+    for (let bbq of serverDataArr) {
+      console.log(bbq.Name_en);
+      let obj = {
+        GIHS: bbq.GIHS,
+        name: bbq.Name_en,
+        district: bbq.District_en,
+        address: bbq.Address_en,
+        longitude: bbq.Longitude,
+        latitude: bbq.Latitude
+      }
+      this.myDataSource.push(obj);
+    }    
+    this.dataSource = this.myDataSource;
+  }
+
+  // custom function (onload) added by wong ka chun
+  onload(): void {
+    let myurl = "http://localhost/ATWD_Project_2021/controller.php/dbinit";
+    this.http.get(myurl).subscribe(
+      {      
+        next: (res) => {
+          console.log(res);
+          this.fillData(res);          
+        },
+        error: (err) => {
+          console.log("Server call failed: " + err);
+        }
+      }
+    );
+  }
+
 }
+
+
+
+
 

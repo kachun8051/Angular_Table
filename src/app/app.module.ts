@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-
+import { HttpClientModule } from '@angular/common/http';
 import { AppComponent } from './app.component';
 import { ArticleComponent } from './article/article.component';
 import { MytableComponent } from './mytable/mytable.component';
@@ -16,7 +16,8 @@ import { MatTableModule } from '@angular/material/table';
   ],
   imports: [
     BrowserModule,
-    MatTableModule
+    MatTableModule,
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]
